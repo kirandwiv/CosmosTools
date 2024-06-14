@@ -14,5 +14,5 @@ foreach ($i in $date_table)
         # submit job
         Write-Host $i.0
         $params = @{ FromDate = $i.0; ToDate = $i.0; }
-        $job = Submit-CosmosScopeJob -ScriptPath C:\Users\v-kirdwivedi\Documents\GitHub\KEYTRUDA\Cosmos_Scripts\weekly.script -VC vc://cosmos09/MSRWW.adhoc -Parameters $params
+        $job = Submit-CosmosScopeJob -ScriptPath C:\Users\v-kirdwivedi\GitHub\Medical_Journeys\Vaccine\SLAPI_Scripts\pharma_words.script -VC vc://cosmos09/MSRWW.adhoc -Parameters $params
     }

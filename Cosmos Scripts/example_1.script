@@ -1,0 +1,53 @@
+//Script GUID:b48e031e-ece2-470c-a0ae-94d632969651
+//Used for tracking history
+#DECLARE FromDate string = @@FromDate@@;
+#DECLARE ToDate string = @@ToDate@@;
+
+#DECLARE outputFile1 string = string.Format(@"/local/teams/Pharma/PharmaSearch_{0}_{1}.tsv", @FromDate, @ToDate);
+
+SLAPIPageView =
+    VIEW @"/shares/searchDM/distrib/released/xSLAPI/xSLAPI.view"
+    PARAMS
+    (
+        Start = @@FromDate@@,
+        End = @@ToDate@@,
+        Dataset = @"Bing.com,Mobile,Charm",
+        Traffic = "Normal",
+        QueryType = "Web"
+    );
+
+
+data =
+    SELECT ClientId AS ClientID,
+           QueryDate AS date,
+           Query_RawQuery.ToLowerInvariant() AS query,
+           User_UiSettingLanguage AS Language,
+           ReverseIpAreaCode AS AreaCode,
+           ReverseIpCity AS City,
+           ReverseIpPostalCode AS PostalCode,
+           DeviceModel AS Device,
+           Webs.ElementAt(0).URL AS TopURL,
+           Ads.ElementAt(0).URL AS TopAd,
+           Clicks.ElementAt(0).URL AS Clicked,
+           Clicks.ElementAt(1).URL AS Clicked2
+    FROM SLAPIPageView
+    WHERE (Request_IsQuery == true) 
+        AND (Request_IsNormalTraffic == true) 
+        AND (User_UiSettingRegion == "US");
+
+fdata = 
+    SELECT *
+    FROM data
+    WHERE REGEX(@"pfizer").IsMatch(query) 
+        OR REGEX(@"moderna").IsMatch(query)
+        OR REGEX(@"covid").IsMatch(query)
+        OR REGEX(@"vaccine").IsMatch(query)
+        OR REGEX(@"vaccination").IsMatch(query)
+        OR REGEX(@"omicron").IsMatch(query)
+        OR REGEX(@"mrna").IsMatch(query)
+        OR REGEX(@"comirnaty").IsMatch(query)
+        OR REGEX(@"spikevax").IsMatch(query)
+        OR REGEX(@"paxlovid").IsMatch(query)
+        OR REGEX(@"booster").IsMatch(query);
+
+OUTPUT fdata TO @outputFile1;
